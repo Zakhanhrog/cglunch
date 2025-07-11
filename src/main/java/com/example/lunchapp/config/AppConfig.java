@@ -64,23 +64,10 @@ public class AppConfig extends WebSecurityConfigurerAdapter {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
-
-        String dbUrl = System.getenv("DATABASE_URL") != null
-                ? System.getenv("DATABASE_URL")
-                : env.getProperty("db.url");
-
-        String dbUsername = System.getenv("DATABASE_USER") != null
-                ? System.getenv("DATABASE_USER")
-                : env.getProperty("db.username");
-
-        String dbPassword = System.getenv("DATABASE_PASSWORD") != null
-                ? System.getenv("DATABASE_PASSWORD")
-                : env.getProperty("db.password");
-
         dataSource.setDriverClassName(env.getProperty("db.driver"));
-        dataSource.setUrl(dbUrl);
-        dataSource.setUsername(dbUsername);
-        dataSource.setPassword(dbPassword);
+        dataSource.setUrl(env.getProperty("db.url"));
+        dataSource.setUsername(env.getProperty("db.username"));
+        dataSource.setPassword(env.getProperty("db.password"));
         return dataSource;
     }
 
@@ -110,20 +97,10 @@ public class AppConfig extends WebSecurityConfigurerAdapter {
 
     private Properties additionalProperties() {
         Properties properties = new Properties();
-
-        String hbm2ddl = System.getenv("HIBERNATE_HBM2DDL_AUTO") != null
-                ? System.getenv("HIBERNATE_HBM2DDL_AUTO")
-                : env.getProperty("hibernate.hbm2ddl.auto");
-
-        properties.setProperty("hibernate.hbm2ddl.auto", hbm2ddl);
+        properties.setProperty("hibernate.hbm2ddl.auto", env.getProperty("hibernate.hbm2ddl.auto"));
         properties.setProperty("hibernate.dialect", env.getProperty("hibernate.dialect"));
         properties.setProperty("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
         properties.setProperty("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
-
-        if (System.getenv("DATABASE_URL") != null) {
-            properties.setProperty("hibernate.connection.url", System.getenv("DATABASE_URL") + "?serverTimezone=UTC&useSSL=false");
-        }
-
         return properties;
     }
 
