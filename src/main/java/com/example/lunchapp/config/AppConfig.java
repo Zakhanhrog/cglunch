@@ -65,30 +65,22 @@ public class AppConfig extends WebSecurityConfigurerAdapter {
     public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
 
-        String jdbcUrl;
-        String username;
-        String password;
+        String dbUrl = System.getenv("DATABASE_URL") != null
+                ? System.getenv("DATABASE_URL")
+                : env.getProperty("db.url");
 
-        String railwayHost = System.getenv("MYSQLHOST");
-        String railwayPort = System.getenv("MYSQLPORT");
-        String railwayDatabase = System.getenv("MYSQL_DATABASE");
-        String railwayUser = System.getenv("MYSQLUSER");
-        String railwayPassword = System.getenv("MYSQLPASSWORD");
+        String dbUsername = System.getenv("DATABASE_USER") != null
+                ? System.getenv("DATABASE_USER")
+                : env.getProperty("db.username");
 
-        if (railwayHost != null && railwayPort != null && railwayDatabase != null && railwayUser != null && railwayPassword != null) {
-            jdbcUrl = String.format("jdbc:mysql://%s:%s/%s?serverTimezone=UTC&useSSL=false", railwayHost, railwayPort, railwayDatabase);
-            username = railwayUser;
-            password = railwayPassword;
-        } else {
-            jdbcUrl = env.getProperty("db.url");
-            username = env.getProperty("db.username");
-            password = env.getProperty("db.password");
-        }
+        String dbPassword = System.getenv("DATABASE_PASSWORD") != null
+                ? System.getenv("DATABASE_PASSWORD")
+                : env.getProperty("db.password");
 
         dataSource.setDriverClassName(env.getProperty("db.driver"));
-        dataSource.setUrl(jdbcUrl);
-        dataSource.setUsername(username);
-        dataSource.setPassword(password);
+        dataSource.setUrl(dbUrl);
+        dataSource.setUsername(dbUsername);
+        dataSource.setPassword(dbPassword);
         return dataSource;
     }
 
@@ -127,6 +119,10 @@ public class AppConfig extends WebSecurityConfigurerAdapter {
         properties.setProperty("hibernate.dialect", env.getProperty("hibernate.dialect"));
         properties.setProperty("hibernate.show_sql", env.getProperty("hibernate.show_sql"));
         properties.setProperty("hibernate.format_sql", env.getProperty("hibernate.format_sql"));
+
+        if (System.getenv("DATABASE_URL") != null) {
+            properties.setProperty("hibernate.connection.url", System.getenv("DATABASE_URL") + "?serverTimezone=UTC&useSSL=false");
+        }
 
         return properties;
     }
